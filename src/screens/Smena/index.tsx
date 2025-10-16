@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DrawerScreensProps } from 'shared/types/Navigation';
+import { NavigationScreenProps } from 'shared/types/Navigation';
 
-type Props = DrawerScreensProps<'List'>;
+type Props = NavigationScreenProps<'Smena'>;
 
-export const ListSmena = (props: Props) => {
+export const Smena = (props: Props) => {
   const {} = props;
   const { left, right, bottom } = useSafeAreaInsets();
 
@@ -18,7 +18,7 @@ export const ListSmena = (props: Props) => {
         paddingBottom: bottom ?? 0,
       }}
     >
-      <Text>ListSmena</Text>
+      <Text>Smena Screen</Text>
     </View>
   );
 };
