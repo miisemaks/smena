@@ -43,9 +43,9 @@ module.exports = {
         rules: [
           {
             from: 'app',
-            allow: ['pages', 'entities', 'shared'],
+            allow: ['screens', 'entities', 'shared'],
           },
-          {from: 'pages', allow: ['entities', 'shared']},
+          {from: 'screens', allow: ['entities', 'shared']},
           {from: 'entities', allow: ['shared']},
           {from: 'shared', allow: ['shared']},
         ],
@@ -56,7 +56,7 @@ module.exports = {
     'import/resolver': {typescript: {}},
     'boundaries/elements': [
       {type: 'app', pattern: 'app/*'},
-      {type: 'pages', pattern: 'screens/*'},
+      {type: 'screens', pattern: 'screens/*'},
       {type: 'entities', pattern: 'entities/*'},
       {type: 'shared', pattern: 'shared/*'},
     ],
