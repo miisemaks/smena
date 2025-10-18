@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect } from 'react';
-import { View, Text, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  Platform,
+  FlatList,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationScreenProps } from 'shared/types/Navigation';
 import {
@@ -12,11 +19,16 @@ import {
 import GetLocation from 'react-native-get-location';
 import { useForm } from 'react-hook-form';
 import { colors } from 'shared/styles/colors';
+import { useQuery } from '@tanstack/react-query';
+import { getShiftList } from 'shared/api/shift';
+import { ShiftItem } from 'shared/ui/ShiftItem';
+import { observer } from 'mobx-react-lite';
+import ShiftStore from 'shared/store/ShiftStore';
 
 type Props = NavigationScreenProps<'List'>;
 
-export const ListSmena = (props: Props) => {
-  const {} = props;
+export const ListShift = observer((props: Props) => {
+  const { navigation } = props;
   const { left, right, bottom } = useSafeAreaInsets();
   const { watch, setValue } = useForm<{
     latitude: number | null;
@@ -29,7 +41,12 @@ export const ListSmena = (props: Props) => {
       setting_visible: false,
     },
   });
-  const { setting_visible } = watch();
+  const { latitude, longitude, setting_visible } = watch();
+  const { data, isLoading, refetch, isRefetching } = useQuery({
+    queryKey: ['shift_list'],
+    queryFn: () => getShiftList({ latitude: latitude!, longitude: longitude! }),
+    enabled: !!latitude && !!longitude,
+  });
 
   const locationRequest = useCallback(async () => {
     try {
@@ -92,7 +109,6 @@ export const ListSmena = (props: Props) => {
         flex: 1,
         paddingLeft: left ?? 0,
         paddingRight: right ?? 0,
-        paddingBottom: bottom ?? 0,
         backgroundColor: colors.bgSecondary,
       }}
     >
@@ -110,6 +126,44 @@ export const ListSmena = (props: Props) => {
           Открыть настройки
         </Text>
       )}
+      {isLoading ? (
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <FlatList
+          data={data?.data ?? []}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <ShiftItem
+              companyName={item.companyName}
+              url={item.logo}
+              address={item.address}
+              price={item.priceWorker}
+              date={item.dateStartByCity}
+              timeStart={item.timeStartByCity}
+              timeEnd={item.timeEndByCity}
+              onPress={() => {
+                ShiftStore.setShiftData(item);
+                navigation.navigate('Shift', { id: item.id });
+              }}
+              rating={item.customerRating}
+            />
+          )}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+          }
+          contentContainerStyle={{
+            gap: 16,
+            paddingBottom: 16 + (bottom ?? 0),
+            paddingTop: 16,
+            paddingHorizontal: 16,
+          }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </View>
   );
-};
+});
